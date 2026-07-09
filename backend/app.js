@@ -6,7 +6,7 @@ const mongoose = require("mongoose");
 
 const app = express();
 
-const PORT = 2500;
+const PORT = process.env.PORT || 2500;
 
 const authRoutes = require("./routes/authentication");
 const metroRoutes = require("./routes/metro");
@@ -19,7 +19,7 @@ app.use("/authentication", authRoutes);
 app.use("/metro", metroRoutes);
 
 mongoose
-  .connect("mongodb://localhost:27017/hack")
+  .connect(process.env.MONGO_URI)
   .then(() => {
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
