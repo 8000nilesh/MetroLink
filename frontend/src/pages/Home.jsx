@@ -8,10 +8,16 @@ export default function Home() {
   const [stations, setStations] = useState([]);
 
   const [source, setSource] = useState("");
-
   const [destination, setDestination] = useState("");
 
   const [result, setResult] = useState(null);
+
+  // Search States
+  const [filteredSource, setFilteredSource] = useState([]);
+  const [filteredDestination, setFilteredDestination] = useState([]);
+
+  const [showSource, setShowSource] = useState(false);
+  const [showDestination, setShowDestination] = useState(false);
 
   useEffect(() => {
     setStations([
@@ -55,6 +61,40 @@ export default function Home() {
     ]);
   }, []);
 
+  function handleSourceSearch(value) {
+    setSource(value);
+
+    if (value.trim() === "") {
+      setFilteredSource([]);
+      setShowSource(false);
+      return;
+    }
+
+    const filtered = stations.filter((station) =>
+      station.toLowerCase().includes(value.toLowerCase()),
+    );
+
+    setFilteredSource(filtered);
+    setShowSource(true);
+  }
+
+  function handleDestinationSearch(value) {
+    setDestination(value);
+
+    if (value.trim() === "") {
+      setFilteredDestination([]);
+      setShowDestination(false);
+      return;
+    }
+
+    const filtered = stations.filter((station) =>
+      station.toLowerCase().includes(value.toLowerCase()),
+    );
+
+    setFilteredDestination(filtered);
+    setShowDestination(true);
+  }
+
   async function findRoute() {
     try {
       const res = await api.post("/metro/route", {
@@ -73,34 +113,70 @@ export default function Home() {
 
     navigate("/");
   }
-
   return (
     <div className="container">
       <div className="card">
         <h1>Delhi Metro Route Finder</h1>
 
-        <select value={source} onChange={(e) => setSource(e.target.value)}>
-          <option value="">Select Source</option>
+        {/* SOURCE */}
 
-          {stations.map((station) => (
-            <option key={station} value={station}>
-              {station}
-            </option>
-          ))}
-        </select>
+        <div className="search-box">
+          <input
+            type="text"
+            placeholder="Search Source Station"
+            value={source}
+            onChange={(e) => handleSourceSearch(e.target.value)}
+            autoComplete="off"
+          />
 
-        <select
-          value={destination}
-          onChange={(e) => setDestination(e.target.value)}
-        >
-          <option value="">Select Destination</option>
+          {showSource && filteredSource.length > 0 && (
+            <div className="suggestions">
+              {filteredSource.map((station) => (
+                <div
+                  key={station}
+                  className="suggestion-item"
+                  onClick={() => {
+                    setSource(station);
+                    setShowSource(false);
+                    setFilteredSource([]);
+                  }}
+                >
+                  {station}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
-          {stations.map((station) => (
-            <option key={station} value={station}>
-              {station}
-            </option>
-          ))}
-        </select>
+        {/* DESTINATION */}
+
+        <div className="search-box">
+          <input
+            type="text"
+            placeholder="Search Destination Station"
+            value={destination}
+            onChange={(e) => handleDestinationSearch(e.target.value)}
+            autoComplete="off"
+          />
+
+          {showDestination && filteredDestination.length > 0 && (
+            <div className="suggestions">
+              {filteredDestination.map((station) => (
+                <div
+                  key={station}
+                  className="suggestion-item"
+                  onClick={() => {
+                    setDestination(station);
+                    setShowDestination(false);
+                    setFilteredDestination([]);
+                  }}
+                >
+                  {station}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
         <button onClick={findRoute}>Find Route</button>
 
